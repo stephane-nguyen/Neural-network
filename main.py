@@ -2,6 +2,7 @@ from display import *
 from helper import *
 from character_recognition import *
 from character_recognition_variant import *
+from character_recognition_generalization import *
 from display import *
 
 
@@ -15,39 +16,40 @@ def main():
     num_weights = 48  # 6x8 grid
     theta = 0.5
     epsilon = 0.01
-
     files = ["zero.txt", "un.txt"]
-  
+
+    W = initialize_weights(num_weights)
+    normalized_weights = normalize_weights(W)
+
+
     err, err_other_file = float("inf"), float("inf")
     total_err = abs(err) + abs(err_other_file)
-
     errors = []
-
 
     while total_err > 0:
         file_name = choose_random_file(files)
         other_file = get_other_file(file_name)
 
-        output, err = recognize_character(file_name, num_weights, theta, epsilon)
-        output_other_file, err_other_file = recognize_character(other_file, num_weights, theta, epsilon)
+        output, err = recognize_character(file_name, normalized_weights, theta, epsilon)
+        output_other_file, err_other_file = recognize_character(other_file, normalized_weights, theta, epsilon)
 
         total_err = abs(err) + abs(err_other_file)
         errors.append(total_err)
 
 
+    W_variant = initialize_weights_variant(num_weights) 
+    normalized_weights_variant = normalize_weights(W_variant)
 
-    # Variant
     err_variant, err_other_file_variant = float("inf"), float("inf")
     total_err_variant = abs(err_variant) + abs(err_other_file_variant)
-
     errors_variant = []
 
     while total_err_variant > 0:
         file_name = choose_random_file(files)
         other_file = get_other_file(file_name)
 
-        output_variant, err_variant = recognize_character_variant(file_name, num_weights, epsilon)
-        output_other_file_variant, err_other_file_variant = recognize_character_variant(other_file, num_weights, epsilon)
+        output_variant, err_variant = recognize_character_variant(file_name, normalized_weights_variant, epsilon)
+        output_other_file_variant, err_other_file_variant = recognize_character_variant(other_file, normalized_weights_variant, epsilon)
 
         total_err_variant = abs(err_variant) + abs(err_other_file_variant)
         errors_variant.append(total_err_variant)
@@ -73,12 +75,18 @@ def main():
     plt.ylabel("Total Error")
     plt.title("Error Comparison")
     plt.legend()
-
     plt.show()
 
-  
+    # Plotting both curves in the same plot
+    plt.figure()
+    plot_generalization_curve("zero.txt", 48, 0.5)  # for the 'zero' pattern
+    plot_generalization_curve("un.txt", 48, 0.5)    # for the 'un' pattern
 
-
-
+    plt.xlabel('Noise Level (%)')
+    plt.ylabel('Error Rate')
+    plt.title('Generalization Curves')
+    plt.legend()
+    plt.show()
+    
 if __name__ == "__main__":
     main()
