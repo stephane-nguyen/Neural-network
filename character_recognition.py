@@ -2,21 +2,21 @@ import random
 
 from helper import get_file_content, get_file_output_value, heaviside
 
-def recognize_character(filename, num_weights, theta, epsilon):
-    
-    W = initialize_weights(num_weights)
-    normalized_weights = normalize_weights(W)
-    
+def recognize_character(filename, weights, theta, epsilon):
     file_content = get_file_content(filename)
     file_output_value = get_file_output_value(file_content)
+    
     X = []
     propagate_on_retina(file_content, X)
-    output = calculate_output_neuron(X, normalized_weights, theta)
+    
+    output = calculate_output_neuron(X, weights, theta)
     error = file_output_value - output
-    update_weight(normalized_weights, epsilon, error, X)
-    output = calculate_output_neuron(X, normalized_weights, theta)
+
+    if error != 0:
+        update_weight(weights, epsilon, error, X)
 
     return output, error
+
 
 def initialize_weights(num_weights):
     return [random.uniform(-1, 1) for _ in range(num_weights)]

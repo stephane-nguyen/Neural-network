@@ -3,21 +3,20 @@ import random
 from helper import heaviside, get_file_content, get_file_output_value
 from character_recognition import normalize_weights, update_weight
 
-def recognize_character_variant(filename, num_weights, epsilon):
-    
-    W = initialize_weights_variant(num_weights)
-    normalized_weights = normalize_weights(W)
-    
+def recognize_character_variant(filename, weights, epsilon):
     file_content = get_file_content(filename)
     file_output_value = get_file_output_value(file_content)
+    
     X = []
     propagate_on_retina_variant(file_content, X)
-    output = calculate_output_neuron_variant(X, normalized_weights)
+    output = calculate_output_neuron_variant(X, weights)
     error = file_output_value - output
-    update_weight(normalized_weights, epsilon, error, X)
-    output = calculate_output_neuron_variant(X, normalized_weights)
+
+    if error != 0:
+        update_weight(weights, epsilon, error, X)
 
     return output, error
+
 
 def propagate_on_retina_variant(file_content, X):
     for line in file_content[:-1]:  # ignore last line
