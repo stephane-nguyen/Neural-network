@@ -1,9 +1,48 @@
-from display import *
 from helper import *
 from character_recognition import *
 from character_recognition_variant import *
 from character_recognition_generalization import *
 
+import numpy as np
+import matplotlib.pyplot as plt
+
+def show_bar(errors, errors_variant):
+    
+    fig, ax = plt.subplots()
+
+    # Plotting the errors for each variant
+    ax.stairs(errors, label='Errors', linewidth=2.5)
+    ax.stairs(errors_variant, label='Errors Variant', linewidth=2.5, linestyle='dashed')
+
+    # Adjusting the x-axis and y-axis limits and ticks
+    max_iterations = max(len(errors), len(errors_variant))
+    ax.set_xlim(0, max_iterations)
+    ax.set_xticks(np.arange(1, max_iterations + 1))
+
+    max_error = max(max(errors), max(errors_variant))
+    ax.set_ylim(0, max_error)
+    ax.set_yticks(np.arange(0, max_error + 1))
+
+    # Adding labels and legend
+    plt.xlabel("Iteration")
+    plt.ylabel("Total Error")
+    plt.title("Error Comparison")
+    plt.legend()
+    plt.show()
+    
+def show_curve(files, num_weights, theta):
+    
+    # Plotting both curves in the same plot
+    plt.figure()
+    plot_generalization_curve(files[0], num_weights, theta)  
+    plot_generalization_curve(files[1], num_weights, theta)    
+
+    plt.xlabel('Noise Level (%)')
+    plt.ylabel('Error Rate')
+    plt.title('Generalization Curves')
+    plt.legend()
+    plt.show()
+    
 def main():
     num_weights = 48  # 6x8 grid
     theta = 0.5
@@ -46,39 +85,8 @@ def main():
         total_err_variant = abs(err_variant) + abs(err_other_file_variant)
         errors_variant.append(total_err_variant)
 
-
-    fig, ax = plt.subplots()
-
-    # Plotting the errors for each variant
-    ax.stairs(errors, label='Errors', linewidth=2.5)
-    ax.stairs(errors_variant, label='Errors Variant', linewidth=2.5, linestyle='dashed')
-
-    # Adjusting the x-axis and y-axis limits and ticks
-    max_iterations = max(len(errors), len(errors_variant))
-    ax.set_xlim(0, max_iterations)
-    ax.set_xticks(np.arange(1, max_iterations + 1))
-
-    max_error = max(max(errors), max(errors_variant))
-    ax.set_ylim(0, max_error)
-    ax.set_yticks(np.arange(0, max_error + 1))
-
-    # Adding labels and legend
-    plt.xlabel("Iteration")
-    plt.ylabel("Total Error")
-    plt.title("Error Comparison")
-    plt.legend()
-    plt.show()
-
-    # Plotting both curves in the same plot
-    plt.figure()
-    plot_generalization_curve(files[0], num_weights, theta)  
-    plot_generalization_curve(files[1], num_weights, theta)    
-
-    plt.xlabel('Noise Level (%)')
-    plt.ylabel('Error Rate')
-    plt.title('Generalization Curves')
-    plt.legend()
-    plt.show()
+    show_bar(errors, errors_variant)
+    show_curve(files, num_weights, theta)
 
 if __name__ == "__main__":
     main()
