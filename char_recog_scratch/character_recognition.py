@@ -9,14 +9,13 @@ def recognize_character(filename, weights, theta, epsilon):
     X = []
     propagate_on_retina(file_content, X)
     
-    output = calculate_output_neuron(X, weights, theta)
+    output = calculate_x_i(X, weights, theta)
     error = file_output_value - output
 
     if error != 0:
         update_weight(weights, epsilon, error, X)
 
     return output, error
-
 
 def initialize_weights(num_weights):
     return [random.uniform(-1, 1) for _ in range(num_weights)]
@@ -35,13 +34,18 @@ def propagate_on_retina(file_content, X):
             else:
                 raise ValueError(f"Invalid character: {char}")
 
-def calculate_output_neuron(X, W, theta):
-    potential = calculate_output_neuron_potential(X, W, theta)
+# x_i : output neuron
+def calculate_x_i(X, W, theta):
+    potential = calculate_pot_i(X, W, theta)
     return heaviside(potential)
 
-def calculate_output_neuron_potential(X, W, theta):
-    return sum(x * w for x, w in zip(X, W)) - theta
+# pot_i : the potential of the output neuron
+def calculate_pot_i(X, W, theta):
+    pot_i = sum(W[i] * X[i] for i in range(len(X)))
+    pot_i -= theta
+    return pot_i
 
+# learn
 def update_weight(normalized_weights, epsilon, error, X):
     for i in range(len(normalized_weights)):
         normalized_weights[i] += epsilon * error * X[i]

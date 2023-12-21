@@ -41,9 +41,9 @@ def recognize_character_with_noise(filename, weights, theta, noise_percentage):
     propagate_on_retina(file_content, X)
     inverse_input_pixels(X, noise_percentage)  # Add noise
 
-    output = calculate_output_neuron(X, weights, theta)
+    output = calculate_x_i(X, weights, theta)
     # error = file_output_value - output
-    potential = calculate_output_neuron_potential(X, weights, theta)
+    potential = calculate_pot_i(X, weights, theta)
     error = file_output_value - potential  # Widrow-Hoff error
     return output, error
 

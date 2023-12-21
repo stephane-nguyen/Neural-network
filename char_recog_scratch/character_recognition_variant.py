@@ -1,7 +1,7 @@
 import random
 
 from helper import heaviside, get_file_content, get_file_output_value
-from character_recognition import normalize_weights, update_weight
+from character_recognition import update_weight
 
 def recognize_character_variant(filename, weights, epsilon):
     file_content = get_file_content(filename)
@@ -9,14 +9,13 @@ def recognize_character_variant(filename, weights, epsilon):
     
     X = []
     propagate_on_retina_variant(file_content, X)
-    output = calculate_output_neuron_variant(X, weights)
+    output = calculate_x_i_variant(X, weights)
     error = file_output_value - output
 
     if error != 0:
         update_weight(weights, epsilon, error, X)
 
     return output, error
-
 
 def propagate_on_retina_variant(file_content, X):
     for line in file_content[:-1]:  # ignore last line
@@ -32,9 +31,10 @@ def propagate_on_retina_variant(file_content, X):
 def initialize_weights_variant(num_weights):
     return [random.uniform(-1, 1) for _ in range(num_weights + 1)]
 
-def calculate_output_neuron_variant(X, W):
-    potential = calculate_output_neuron_potential_variant(X, W)
+def calculate_x_i_variant(X, W):
+    potential = calculate_pot_i_variant(X, W)
     return heaviside(potential)
 
-def calculate_output_neuron_potential_variant(X, W):
-    return sum(x * w for x, w in zip(X, W))
+def calculate_pot_i_variant(X, W):
+    pot_i = sum(W[i] * X[i] for i in range(len(X)))
+    return pot_i
