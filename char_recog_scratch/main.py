@@ -31,7 +31,7 @@ def show_bar(errors, errors_variant):
     plt.show()
     
 def show_curve(files, num_weights, theta):
-    
+        
     # Plotting both curves in the same plot
     plt.figure()
     plot_generalization_curve(files[0], num_weights, theta)  
@@ -43,6 +43,30 @@ def show_curve(files, num_weights, theta):
     plt.legend()
     plt.show()
     
+def generate_learning_curve(num_weights, theta, epsilon, files):
+    W = initialize_weights(num_weights)
+    normalized_weights = normalize_weights(W)
+    errors = []
+    total_err = float("inf")
+    iteration = 0
+
+    while total_err > 0:
+        total_err = 0  
+        for _ in range(10000):  # 10,000 iterations
+            file_name = choose_random_file(files)
+            output, err = recognize_character(file_name, normalized_weights, theta, epsilon)
+            total_err += abs(err) # if -1: error -> 1
+        print(total_err)
+
+        errors.append(total_err)
+        iteration += 1
+
+    plt.plot(range(1, iteration + 1), errors)
+    plt.xlabel('Iteration')
+    plt.ylabel('Total Error')
+    plt.title('Learning Curve')
+    plt.show()
+    
 def main():
     num_weights = 48  # 6x8 grid
     theta = 0.5
@@ -52,6 +76,7 @@ def main():
     W = initialize_weights(num_weights)
     normalized_weights = normalize_weights(W)
 
+    generate_learning_curve(num_weights, theta, epsilon, files)
 
     err, err_other_file = float("inf"), float("inf")
     total_err = abs(err) + abs(err_other_file)
