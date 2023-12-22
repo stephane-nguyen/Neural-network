@@ -75,11 +75,11 @@ def calculate_output_layer_output(hidden_layer_output, weights_hidden_output):
     return output_layer_output, pot_i
 
 def sigmoid(x):
-    """Compute the sigmoid function safely for large `x`."""
+    """Compute the sigmoid function safely for large x."""
     if x < -700:  # Values less than -700 will cause overflow in `exp`.
-        return 0.0
+        return 0
     elif x > 700:  # Values greater than 700 will lead to a sigmoid very close to 1.
-        return 1.0
+        return 1
     return 1 / (1 + math.exp(-x))
 
 def calculate_delta_output_layer(pot_i, label, x_i):
@@ -112,7 +112,7 @@ def calculate_error_percentage(delta_output, p):
     error_percentage = (error_sum / len(delta_output)) * 100
     return error_percentage / p
 
-def launch_network(label, image):
+def launch_network(labelsFile, imagesFile):
     input_size = 28 * 28
     hidden_size = 100
     output_size = 10
@@ -126,8 +126,8 @@ def launch_network(label, image):
         weights_input_hidden = set_weights(input_size, hidden_size)
         weights_hidden_output  = set_weights(hidden_size, output_size)
 
-        labels = read_labels('train-labels.idx1-ubyte')
-        images = read_images('train-images.idx3-ubyte')
+        labels = read_labels(labelsFile)
+        images = read_images(imagesFile)
         label, image_index = get_random_pattern(images, labels)
 
         x_j = propagate_on_retina(images[image_index])
@@ -153,12 +153,60 @@ def launch_network(label, image):
     plt.ylabel('Error Percentage')
     plt.title('Error Percentage Over Iterations') 
     plt.show()
+   
     
+def launch_network_test(label_filename, image_filename, examples=10000):
+    input_size = 28 * 28
+    hidden_size = 100
+    output_size = 10
+    epsilon = 0.01  # Learning rate
+    
+    weights_input_hidden = set_weights(input_size, hidden_size)
+    weights_hidden_output  = set_weights(hidden_size, output_size)
+
+
+    error_percentages = []  # For plotting purpose
+    count = 0  # Counter for processed examples
+
+    while count < examples:
+        labels = read_labels(label_filename)
+        images = read_images(image_filename)
+        label, image_index = get_random_pattern(images, labels)
+
+        x_j = propagate_on_retina(images[image_index])
+        x_h, pot_h = calculate_hidden_layer_output(x_j, weights_input_hidden)
+        x_i, pot_i = calculate_output_layer_output(x_h, weights_hidden_output)
+
+        delta_i = calculate_delta_output_layer(pot_i, label, x_i)
+        delta_h = calculate_delta_hidden_layer(pot_h, delta_i, weights_hidden_output, x_h)
+
+        for k in range(output_size):
+            weights_hidden_output[k] = learn(weights_hidden_output[k], delta_i[k], epsilon, x_h)
+
+        for j in range(hidden_size):
+            weights_input_hidden[j] = learn(weights_input_hidden[j], delta_h[j], epsilon, x_j)
+
+        error_percentage = calculate_error_percentage(delta_i, 100)
+        error_percentages.append(error_percentage)
+
+        count += 1 
+
+        if count % 100 == 0:  # Log the progress
+            print(f'Processed example {count}/{examples}, Current error percentage: {error_percentage:.2f}%')
+
+    plt.plot(error_percentages)
+    plt.xlabel('Example')
+    plt.ylabel('Error Percentage')
+    plt.title('Error Percentage Over Examples')
+    plt.show()
+
+ 
 def main():
-    # Train base
+    # # Train base
     launch_network('train-labels.idx1-ubyte', 'train-images.idx3-ubyte')
-    # Test base
-    launch_network('t10k-images-idx3-ubyte', 't10k-labels-idx1-ubyte')
-    
+    # # Test base
+    # launch_network('t10k-labels.idx1-ubyte', 't10k-images.idx3-ubyte')
+    launch_network_test('t10k-labels.idx1-ubyte', 't10k-images.idx3-ubyte')
+
 if __name__ == "__main__":
     main()
